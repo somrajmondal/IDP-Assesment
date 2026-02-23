@@ -12,7 +12,7 @@ This document defines how the system interacts with AI/LLM services — covering
 |-------|-------------|----------------|
 | UI | Trusted (admin-controlled) | Defines configuration and intent |
 | Backend | Trusted | Enforces validation and rules |
-| AI / LLM | **Untrusted** | Executes instructions only |
+| AI / LLM | Mid | Executes instructions only |
 | Database | Trusted | Accepts validated data only |
 
 - All AI output is treated as **untrusted user input**
@@ -152,18 +152,9 @@ This enables:
 
 ---
 
-## 8. 🔒 Failure Isolation
 
-| Property | Guarantee |
-|----------|-----------|
-| AI failures affect system stability | ❌ No — fully isolated |
-| AI errors corrupt stored data | ❌ No — rejected before storage |
-| Each request shares state | ❌ No — fully stateless |
-| Partial failures are stored | ❌ No — safely discarded |
 
----
-
-## 9. 🗺️ Security Boundary Summary
+## 8. 🗺️ Security Boundary Summary
 
 ```
 ┌─────────────────────────────────────────┐
@@ -178,8 +169,3 @@ This enables:
 ```
 
 ---
-
-## 🔗 Related
-
-- [`README.md`](./README.md) — Platform overview and setup
-- [`prompting_rules.md`](./prompting_rules.md) — Prompt design and construction rules
