@@ -1,113 +1,55 @@
-📄 Intelligent Document Processing (IDP) Platform
+# 📄 Intelligent Document Processing (IDP) Platform
 
-An enterprise-grade AI Document Digitization Platform that dynamically classifies documents, extracts structured data, and generates machine-readable outputs using configurable templates and an external LLM service — without any hardcoded logic.
+> An enterprise-grade AI Document Digitization Platform that dynamically classifies documents, extracts structured data, and generates machine-readable outputs — **without any hardcoded logic**.
 
-🚀 Overview
+![Python](https://img.shields.io/badge/Python-FastAPI-blue?logo=python) ![React](https://img.shields.io/badge/Frontend-React%20%2B%20TypeScript-61DAFB?logo=react) ![LLM](https://img.shields.io/badge/AI-LLM%20Powered-orange) ![License](https://img.shields.io/badge/License-MIT-green)
 
-This platform enables organizations to upload, classify, and extract structured information from documents such as:
+---
 
-Passports
+## 🚀 Overview
 
-Emirates IDs
+This platform enables organizations to upload, classify, and extract structured information from documents using a configurable AI pipeline. Everything — document types, templates, entities, and prompts — is managed through an Admin UI with **no redeployment required**.
 
-Salary Certificates
+### Supported Document Types
 
-Bank Statements
+| Document | Example Fields |
+|----------|----------------|
+| Passport | Name, DOB, Expiry, Nationality |
+| Emirates ID | ID Number, Name, Expiry |
+| Salary Certificate | Employer, Salary, Issue Date |
+| Bank Statement | Account, Transactions, Balance |
+| Invoice | Vendor, Amount, Line Items |
+| *Any custom type* | *Admin-defined at runtime* |
 
-Invoices
+---
 
-Any custom document type (added dynamically)
+## ✨ Core Capabilities
 
-The system is fully configurable via Admin UI, allowing document intelligence logic to evolve without redeployment or code changes.
+### 📁 Document Management
+- Folder-based document organization
+- Upload up to 5 files per folder
+- Multi-page document support with page-wise processing
 
-✨ Core Capabilities
-📁 Document Management
+### 🧠 AI-Powered Processing
+- Prompt-based dynamic document classification
+- Entity extraction using admin-defined templates
+- Confidence scoring per extracted field
+- Stateless, pluggable LLM integration
 
-Folder-based document organization
+### 🛠️ Fully Dynamic Admin Configuration
+Everything is runtime-configurable — no code changes needed:
 
-Upload up to 5 files per folder
+- **Document Types** — Define name, description, and classification prompt
+- **Templates** — Multiple layouts per document type; enable/disable anytime
+- **Entities** — Name, backend key, data type, customer type, LLM prompt description
 
-Multi-page document support
+> ➡️ Nothing is hardcoded. Everything is prompt-driven.
 
-Page-wise processing & extraction
+---
 
-🧠 AI-Powered Processing
+## 🏗️ Architecture
 
-Prompt-based dynamic document classification
-
-Entity extraction using admin-defined templates
-
-Page-wise extraction results
-
-Confidence scoring per extracted field
-
-Stateless external LLM integration
-
-🛠️ Fully Dynamic Admin Configuration (No Code Changes)
-
-Admins can add, edit, or delete everything at runtime:
-
-📄 Document Types
-
-Define document name & description
-
-Configure classification prompt
-
-Add unlimited document types dynamically
-
-📑 Templates
-
-Multiple templates per document type
-
-Support different layouts/formats
-
-Enable/disable templates anytime
-
-🧾 Entities
-
-Each entity is fully configurable:
-
-Entity name
-
-Backend key
-
-Data type (Text, Numeric, Date, Boolean, etc.)
-
-Customer type (Individual / Non-Individual)
-
-LLM prompt description
-
-Runtime editable & removable
-
-➡️ Nothing is hardcoded. Everything is prompt-driven.
-
-🔁 Dynamic AI Execution Flow
-
-Admin configures document types, templates & entities
-
-Backend builds a live JSON schema
-
-JSON + prompt sent to external LLM
-
-LLM performs:
-
-Document classification
-
-Entity extraction
-
-Structured output returned & stored
-
-📤 Export & Integration
-
-Download extracted data as JSON
-
-Page-wise structured output
-
-API-accessible extraction results
-
-Ready for downstream systems
-
-🏗️ System Architecture
+```
 Frontend (React + TypeScript)
         ↓
 Backend API (FastAPI)
@@ -115,60 +57,90 @@ Backend API (FastAPI)
 External LLM Service
   • Document Classification
   • Entity Extraction
+```
 
-Clean separation of concerns
+- **Clean separation of concerns** — UI configures, backend validates, AI executes
+- **AI is an implementation detail** — swap models via environment variable only
+- **Microservice-ready** — each layer is independently deployable
 
-AI engine is pluggable & replaceable
+---
 
-Microservice-ready architecture
+## 🔁 AI Execution Flow
 
-📁 Project Structure
+```
+1. Admin configures document types, templates & entities
+2. Backend builds a live JSON schema at runtime
+3. JSON schema + prompt sent to external LLM
+4. LLM classifies the document and extracts entities
+5. Output validated by backend before storage
+```
+
+---
+
+## 📁 Project Structure
+
+```
 doc-digitization/
 ├── backend/
 │   ├── api/
 │   ├── models/
 │   ├── services/
 │   └── main.py
-│
 ├── frontend/
 │   ├── src/
 │   ├── components/
 │   └── pages/
-│
 └── LLM/
     ├── main.py
     └── prompts/
-⚙️ Setup & Run
-Backend
+```
+
+---
+
+## ⚙️ Setup & Run
+
+### Backend
+
+```bash
 cd backend
 pip install -r requirements.txt
 uvicorn main:app --reload
+# Runs at http://localhost:8000
+```
 
-Backend runs at:
+### Frontend
 
-http://localhost:8000
-Frontend
+```bash
 cd frontend
 npm install
 npm run dev
+# Runs at http://localhost:3000
+```
 
-Frontend runs at:
+### LLM Service
 
-http://localhost:3000
-LLM Service
+```bash
 cd LLM
 python main.py
+# Runs at http://localhost:5002
+```
 
-LLM service runs at:
+---
 
-http://localhost:5002
-🧠 AI Processing Integration
-Processing Request
+## 🧠 AI Integration Reference
+
+### Processing Request
+
+```json
 {
   "folder_id": 1,
   "llm_endpoint": "http://127.0.0.1:5002/up_doc"
 }
-Expected AI Response Format
+```
+
+### Expected AI Response Format
+
+```json
 {
   "classification": {
     "class_name": "Salary Certificate",
@@ -190,35 +162,55 @@ Expected AI Response Format
   "page": 1,
   "error": null
 }
-🗄️ Database Configuration
+```
 
-Default:
+---
 
-SQLite
+## 🗄️ Database Configuration
 
-Production (Example):
+| Environment | Config |
+|-------------|--------|
+| Development | SQLite (default) |
+| Production | `DATABASE_URL=postgresql://user:password@localhost/docdb` |
 
-DATABASE_URL=postgresql://user:password@localhost/docdb
-🔐 Security & Scalability
+---
 
-Stateless AI processing
+## 📤 Export & Integration
 
-Clear separation between UI, Backend & AI
+- Download extracted data as JSON
+- Page-wise structured output
+- API-accessible extraction results
+- Ready for downstream systems (KYC, HR, ERP, etc.)
 
-Easily deployable as microservices
+---
 
-Cloud & enterprise ready
+## 📌 Use Cases
 
-Supports horizontal scaling
+- 🏦 Banking & KYC automation
+- 👔 HR document processing
+- 🪪 Government ID digitization
+- 📂 Enterprise document indexing
+- 🔄 Data migration & validation
 
-📌 Use Cases
+---
 
-Banking & KYC automation
+## 📚 Further Reading
 
-HR document processing
+- [`ai-constraints.md`](./ai-constraints.md) — AI trust model, output rules, and security boundaries
+- [`prompting_rules.md`](./prompting_rules.md) — Prompt design principles, construction flow, and failure handling
 
-Government ID digitization
+---
 
-Enterprise document indexing
+## 🤝 Contributing
 
-Data migration & validation
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.

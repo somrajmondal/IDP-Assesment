@@ -1,172 +1,185 @@
-1. Trust Model
+# 🔐 AI Constraints & Safety Model
 
-The AI/LLM is never trusted to enforce correctness
+This document defines how the system interacts with AI/LLM services — covering trust boundaries, output rules, validation enforcement, and failure handling.
 
-All AI output is treated as untrusted user input
+> **Core principle:** The AI executes instructions only. The backend is the single source of truth.
 
-The backend is the single source of truth
+---
 
-The database is never written to directly by AI output
+## 1. 🛡️ Trust Model
 
-All AI responses must pass backend validation before being accepted.
+| Layer | Trust Level | Responsibility |
+|-------|-------------|----------------|
+| UI | Trusted (admin-controlled) | Defines configuration and intent |
+| Backend | Trusted | Enforces validation and rules |
+| AI / LLM | **Untrusted** | Executes instructions only |
+| Database | Trusted | Accepts validated data only |
 
-2. Model Switching & Replacement Strategy
+- All AI output is treated as **untrusted user input**
+- The database is **never written to directly** by AI output
+- All AI responses must **pass backend validation** before being accepted
+- No single layer can compromise system integrity
 
-The system is explicitly designed to support multiple AI models for both
-document classification and entity extraction.
+---
 
-Supported Capabilities
+## 2. 🔄 Model Switching & Replacement
 
-Classification and extraction models can be switched via environment variables
+The system is explicitly designed to support multiple AI models. Switching models requires **no UI or backend changes** — only the adapter layer is replaced.
 
-No UI or backend business logic changes are required
+### Supported Model Types
 
-Only the AI adapter layer is replaced
+| Type | Examples |
+|------|----------|
+| Cloud LLMs | OpenAI, Azure OpenAI |
+| Open-source VLMs | Qwen-VL, Nougat, Donut |
+| Hybrid (OCR + scoring) | Azure OCR + TF-IDF similarity |
 
-Supported Model Types
+### Switching via Environment Variable
 
-Cloud LLMs (OpenAI, Azure OpenAI, etc.)
+```bash
+# Example: switch classification model
+CLASSIFICATION_MODEL=qwen-vl
 
-Open-source models (e.g. vision-language models such as Qwen-VL, Nougat, Donut)
+# Example: switch extraction model  
+EXTRACTION_MODEL=azure-openai
+```
 
-Hybrid approaches:
+> AI is an implementation detail, not a dependency risk.
 
-OCR + TF-IDF similarity scoring
+---
 
-Azure OCR + classical text similarity for classification confidence
+## 3. 📤 Output Constraints
 
-Classification Flexibility
+### ✅ The AI Must
 
-Document classification can be performed using:
+- Return **valid JSON only**
+- Follow the **schema provided in the prompt**
+- Use **backend-defined keys exactly** as provided
+- Respect declared **data types**
+- Return `null` for any value that is not found
 
-LLM-based reasoning
+### ❌ The AI Must NOT
 
-OCR-extracted text + TF-IDF similarity scoring
+- Add new keys
+- Rename existing keys
+- Modify backend identifiers
+- Return free-form text or explanations
+- Guess, infer, or creatively fill missing fields
 
-Combined scoring strategies for higher reliability
+> Any violation results in **immediate rejection**. No partial data is stored.
 
-AI is an implementation detail, not a dependency risk.
+---
 
-3. Output Constraints
+## 4. ✅ Schema Enforcement (Backend)
 
-The AI must:
+Before any AI output is accepted, the backend validates:
 
-Return valid JSON only
+```
+✔ JSON structure is valid
+✔ Required fields are present
+✔ Entity backend keys match the schema
+✔ Page number bounds are within range
+✔ Data types match declarations
+```
 
-Follow the schema provided in the prompt
+### On Validation Failure
 
-Use backend-defined keys exactly as provided
+```
+✘ Response is rejected
+✘ No partial data is stored
+✘ Error is logged with full diagnostic context
+```
 
-Respect declared data types
+---
 
-The AI must NOT:
+## 5. 🗂️ Classification Safety Rules
 
-Add new keys
+Classification output **must include**:
 
-Rename existing keys
-
-Modify backend identifiers
-
-Return free-form text or explanations
-
-Any violation results in rejection.
-
-4. Schema Enforcement (Backend)
-
-Before any AI output is accepted:
-
-JSON structure is validated
-
-Required fields are enforced
-
-Entity backend keys are verified
-
-Page number bounds are checked
-
-If validation fails:
-
-The response is rejected
-
-No partial data is stored
-
-The error is logged for observability and debugging
-
-5. Classification Safety Rules
-
-Classification output must include:
-
-class_name
-
-(Optional) confidence score if supported by the model
-
-Invalid classification results trigger:
-
-Request failure
-
-Diagnostic logging
-
-Prevention of downstream extraction
-
-Classification must always resolve to exactly one document type.
-
-6. Entity Extraction Safety Rules
-
-Every extracted entity must exist in the provided schema
-
-Entity values must match declared data types
-
-Missing or unknown values must be returned as null
-
-The system explicitly forbids:
-
-Guessing or inferring values
-
-Filling missing fields creatively
-
-Cross-page inference without explicit evidence
-
-7. Observability & Debugging
-
-All AI interactions are logged with:
-
-Request ID
-
-Prompt version hash
-
-Model identifier
-
-Validation result
-
-Error reason (if any)
+```json
+{
+  "class_name": "Salary Certificate",
+  "score": 0.97
+}
+```
+
+| Rule | Detail |
+|------|--------|
+| Exactly one document type | Multi-type output is invalid |
+| Confidence score required | Range: `0.0` to `1.0` |
+| Uncertain? Still pick one | Lower the score, don't omit |
+
+**Invalid outputs trigger:**
+- Request failure
+- Diagnostic logging
+- Prevention of downstream extraction
+
+---
+
+## 6. 🧾 Entity Extraction Safety Rules
+
+| Rule | Behavior |
+|------|----------|
+| Entity must exist in schema | Unknown entities are rejected |
+| Value matches declared type | Type mismatch causes rejection |
+| Value not found | Return `null` — never guess |
+| Cross-page inference | Only allowed with explicit evidence |
+
+**Explicitly forbidden:**
+- Guessing or inferring missing values
+- Filling fields creatively
+- Inventing entities not in the schema
+
+---
+
+## 7. 📊 Observability & Debugging
+
+Every AI interaction is logged with:
+
+```
+• Request ID
+• Prompt version hash
+• Model identifier
+• Validation result (pass / fail)
+• Error reason (if applicable)
+```
 
 This enables:
+- Debugging incorrect outputs
+- Prompt tuning and A/B testing
+- Regression detection across model versions
+- Model comparison over time
 
-Debugging incorrect outputs
+---
 
-Prompt tuning
+## 8. 🔒 Failure Isolation
 
-Regression detection
+| Property | Guarantee |
+|----------|-----------|
+| AI failures affect system stability | ❌ No — fully isolated |
+| AI errors corrupt stored data | ❌ No — rejected before storage |
+| Each request shares state | ❌ No — fully stateless |
+| Partial failures are stored | ❌ No — safely discarded |
 
-Model comparison over time
+---
 
-8. Failure Isolation
+## 9. 🗺️ Security Boundary Summary
 
-AI failures do not affect system stability
+```
+┌─────────────────────────────────────────┐
+│  UI — defines configuration and intent  │
+├─────────────────────────────────────────┤
+│  Backend — enforces validation & rules  │
+├─────────────────────────────────────────┤
+│  AI — executes instructions only        │
+├─────────────────────────────────────────┤
+│  Database — accepts validated data only │
+└─────────────────────────────────────────┘
+```
 
-AI errors do not corrupt stored data
+---
 
-Each AI request is stateless and isolated
+## 🔗 Related
 
-Partial failures are safely discarded
-
-9. Security Boundary Summary
-
-UI defines configuration and intent
-
-Backend enforces validation and rules
-
-AI executes instructions only
-
-Database accepts validated data only
-
-No single layer can compromise system integrity.
+- [`README.md`](./README.md) — Platform overview and setup
+- [`prompting_rules.md`](./prompting_rules.md) — Prompt design and construction rules
