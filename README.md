@@ -2,7 +2,7 @@
 
 > An enterprise-grade AI Document Digitization Platform that dynamically classifies documents, extracts structured data, and generates machine-readable outputs — **without any hardcoded logic**.
 
-![Python](https://img.shields.io/badge/Python-FastAPI-blue?logo=python) ![React](https://img.shields.io/badge/Frontend-React%20%2B%20TypeScript-61DAFB?logo=react) ![LLM](https://img.shields.io/badge/AI-LLM%20Powered-orange) ![License](https://img.shields.io/badge/License-MIT-green)
+![Python](https://img.shields.io/badge/Python-Flask-blue?logo=python) ![React](https://img.shields.io/badge/Frontend-React%20%2B%20TypeScript-61DAFB?logo=react) ![LLM](https://img.shields.io/badge/AI-LLM%20Powered-orange) ![License](https://img.shields.io/badge/License-MIT-green)
 
 ---
 
