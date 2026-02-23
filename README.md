@@ -1,141 +1,170 @@
-# DocuScan – Document Digitization Platform
+📄 Intelligent Document Processing Software
 
-A full-stack AI-powered document processing platform with dynamic template management.
+Upload, process, and break down data barriers with AI to extract valuable information from documents.
 
-## 🏗️ Project Structure
+An enterprise-grade AI Document Digitization Platform that automates document classification, data extraction, and structured output generation using configurable templates and an external LLM service.
 
-```
+🚀 Overview
+
+This platform enables organizations to digitize, classify, and extract structured data from documents such as:
+
+Passports
+
+Emirates IDs
+
+Salary Certificates
+
+
+It provides a modern UI, admin-driven configuration, and LLM-powered intelligence while keeping the architecture modular and scalable.
+
+✨ Core Features
+📁 Document Management
+
+Folder-based document organization
+
+Upload up to 5 files per folder
+
+Support for multi-page documents
+
+ZIP download of original files
+
+🧠 AI Processing
+
+Automatic document classification
+
+Entity extraction using dynamic templates
+
+Page-wise extraction results
+
+Confidence scoring per extracted field
+
+🛠️ Admin Configuration
+
+Document type management
+
+Template creation per document type
+
+Entity definition with:
+
+Backend keys
+
+Data types (Text, Numeric, Date, etc.)
+
+Customer type
+
+LLM prompt descriptions
+
+Live JSON preview sent to AI engine
+
+📤 Export Options
+
+Download extracted data as JSON
+
+Page-wise structured output
+
+API-accessible extraction results
+
+🏗️ System Architecture
+Frontend (React + TypeScript)
+        ↓
+Backend API (FastAPI)
+        ↓
+External LLM Service
+  • Document Classification
+  • Entity Extraction
+
+The AI engine is integrated as an external service, ensuring flexibility and easy replacement or scaling.
+
+📁 Project Structure
 doc-digitization/
-├── backend/                  # FastAPI Python backend
+├── backend/                  # FastAPI backend
 │   ├── app/
-│   │   ├── api/              # Route handlers
-│   │   │   ├── admin.py      # Document types CRUD
-│   │   │   ├── documents.py  # File & extraction results
-│   │   │   ├── folders.py    # Folder management & file upload
-│   │   │   ├── process.py    # LLM processing pipeline
-│   │   │   └── templates.py  # Templates & entities CRUD
-│   │   ├── db/
-│   │   │   └── database.py   # SQLAlchemy DB setup
-│   │   ├── models/
-│   │   │   └── models.py     # DB models (all tables)
-│   │   ├── schemas/
-│   │   │   └── schemas.py    # Pydantic request/response schemas
-│   │   └── main.py           # FastAPI app entry point
-│   ├── requirements.txt
-│   └── run.sh
+│   │   ├── api/              # API routes
+│   │   ├── models/           # Database models
+│   │   ├── schemas/          # Request/response schemas
+│   │   ├── db/               # Database configuration
+│   │   └── main.py           # App entry point
+│   └── requirements.txt
 │
 └── frontend/                 # React + TypeScript frontend
     ├── src/
-    │   ├── components/
-    │   │   └── common/
-    │   │       ├── Layout.tsx     # App shell with sidebar nav
-    │   │       └── Layout.css
-    │   ├── pages/
-    │   │   ├── Dashboard.tsx      # Main processing dashboard
-    │   │   ├── Dashboard.css
-    │   │   ├── FolderDetail.tsx   # 2-panel folder view
-    │   │   ├── FolderDetail.css
-    │   │   └── admin/
-    │   │       ├── AdminLayout.tsx
-    │   │       ├── AdminDocumentTypes.tsx  # Document type CRUD
-    │   │       ├── AdminTemplates.tsx      # Template + entity CRUD
-    │   │       └── Admin.css
-    │   ├── store/
-    │   │   └── appStore.ts    # Zustand state management
-    │   ├── utils/
-    │   │   └── api.ts         # Axios API client
-    │   ├── App.tsx
-    │   ├── main.tsx
-    │   └── index.css          # Global styles
-    ├── package.json
-    ├── vite.config.ts
-    └── index.html
-```
+    │   ├── components/       # Reusable UI components
+    │   ├── pages/            # Dashboard & Admin views
+    │   ├── store/            # State management
+    │   ├── utils/            # API utilities
+    │   └── App.tsx
+    └── package.json
 
-## 🚀 Setup & Run
-
-### Backend
-
-```bash
+⚙️ Setup & Run
+Backend
 cd backend
 pip install -r requirements.txt
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-```
 
-API docs available at: http://localhost:8000/docs
+API documentation available at:
 
-### Frontend
-
-```bash
+http://localhost:8000/docs
+Frontend
 cd frontend
 npm install
 npm run dev
-```
 
-App available at: http://localhost:3000
+Application runs at:
 
-### Seed Sample Data
+http://localhost:3000
+🧠 AI Processing Integration
 
-After starting both servers, go to **Admin > Document Types** and click **Seed Sample Data** to load the Passport, Emirates ID, and Salary Certificate templates from the provided JSON structure.
+The platform connects to an external AI/LLM service during document processing.
 
-## 🔑 Key Features
-
-### User Flow
-1. **Dashboard** – Create folders, upload up to 5 files per folder
-2. **Process** – Click Process to send files + template JSON to your LLM endpoint
-3. **Folder Detail** – 2-panel view: left shows files, right shows extracted entities
-4. **Download** – Get ZIP of all uploaded files or JSON of all extracted data
-
-### Admin Panel
-1. **Document Types** – Create/edit/delete document categories (Passport, Emirates ID, etc.)
-2. **Templates** – Manage templates per document type with description, keywords
-3. **Entities** – Add/edit/delete extraction fields with:
-   - Entity name (T24 & DMS)
-   - Backend key
-   - Data type (Alphabet, AlphaNumeric, Numeric, Date, etc.)
-   - Customer type
-   - LLM description prompt
-4. **JSON Preview** – See the exact JSON that gets sent to the LLM backend
-
-### LLM Integration
-- Connects to your existing LLM endpoint (default: `http://127.0.0.1:5002/up_remm1`)
-- Sends multipart form: `files` + `json` (template data)
-- Parses response format: `{"1": {"classification": {...}, "extraction": [...]}}`
-- Stores results in DB, displays page-by-page in UI
-
-## 📡 API Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/folders/` | List all folders |
-| POST | `/api/folders/` | Create folder |
-| POST | `/api/folders/{id}/upload` | Upload files (max 5) |
-| GET | `/api/folders/{id}/download-zip` | Download folder as ZIP |
-| POST | `/api/process/` | Start LLM processing |
-| GET | `/api/process/folder/{id}/results` | Get extraction results |
-| GET | `/api/process/folder/{id}/download-json` | Download results JSON |
-| GET | `/api/admin/document-types` | List document types |
-| POST | `/api/admin/document-types` | Create document type |
-| GET | `/api/templates/` | List templates |
-| POST | `/api/templates/` | Create template |
-| GET | `/api/templates/{id}/json-preview` | Get template JSON |
-| POST | `/api/templates/{id}/entities` | Add entity |
-| PUT | `/api/templates/entities/{id}` | Update entity |
-| DELETE | `/api/templates/entities/{id}` | Delete entity |
-
-## 🗄️ Database
-
-Uses SQLite by default (stored as `doc_digitization.db`). Switch to PostgreSQL via env var:
-```bash
-DATABASE_URL=postgresql://user:pass@localhost/docdb
-```
-
-## 🔧 Configuration
-
-Customize LLM endpoint when processing:
-```json
+Processing Request Example
 {
   "folder_id": 1,
-  "llm_endpoint": "http://your-llm-server/up_remm1"
+  "llm_endpoint": "http://127.0.0.1:5002/up_doc"
 }
-```
+Expected AI Response Format
+{
+  "1": {
+    "classification": {
+      "document_type": "Passport",
+      "confidence": 0.97
+    },
+    "extraction": [
+      {
+        "entity": "passport_number",
+        "value": "A12345678",
+        "confidence": 0.93,
+        "page": 1
+      }
+    ]
+  }
+}
+
+🗄️ Database
+
+Default: SQLite
+
+Optional: PostgreSQL
+
+DATABASE_URL=postgresql://user:password@localhost/docdb
+🔐 Security & Scalability
+
+Clean separation between UI, backend, and AI engine
+
+Stateless AI processing
+
+Easily deployable as microservices
+
+Ready for cloud & enterprise environments
+
+📌 Use Cases
+
+Banking & KYC automation
+
+HR document processing
+
+Government ID digitization
+
+Enterprise document indexing
+
+Data migration & validation
+

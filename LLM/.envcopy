@@ -1,0 +1,18 @@
+
+ocrEndpoint=
+subscriptionKey=
+
+
+# OpenAI and Google API keys
+OPENAI_API_KEY=
+GOOGLE_API_KEY =
+
+#api
+CLASSIFICATION_MODEL_COMPANY = "openai"
+EXTRACTION_MODEL_COMPANY="openai"
+
+#model
+GEMINI_MODEL="gemini-1.5-flash"
+OPENAI_CLASSIFICATION_MODEL="gpt-4o-mini"
+OPENAI_EXTRACTION_MODEL="gpt-4o-mini"
+

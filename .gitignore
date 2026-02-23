@@ -1,0 +1,42 @@
+# =========================
+# Python
+# =========================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual Environments
+venv/
+bvenv/
+.env
+doc-digitization/LLM/.env
+
+# SQLite / Databases
+*.db
+*.sqlite3
+
+# =========================
+# Backend specific
+# =========================
+backend/doc_digitization.db
+backend/app/__pycache__/
+backend/bvenv/
+
+# =========================
+# Frontend (Node / React)
+# =========================
+node_modules/
+
+
+# =========================
+# LLM Service
+# =========================
+LLM/.env
+LLM/.cache/
+LLM/__pycache__/
+
+# =========================
+# Logs
+# =========================
+*.log
