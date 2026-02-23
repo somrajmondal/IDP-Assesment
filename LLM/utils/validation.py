@@ -57,17 +57,13 @@ class Formatter:
 
         entity_mappings = {
             "emirates id": {"emirates_id_number", "eid_expiry_date", "eid_issuance_date", "country_of_residency"},
-            "customer risk rating(aml)": {"customer_risk_rating","cust_name"},
-            "fatca declaration": {"fatca"},
-            "passport": {"customer_name_bank_records", "passport_issuance_date", "place_of_birth", 
+            "passport": {"place_of_birth", 
                     "customer_name_passport", "date_of_birth", "passport_expiry_date", 
-                     "passport_number","nationality_1","country_of_issuance","gb_nick_name"}
+                     "passport_number",}
         }
 
         class_thresholds = {
             "emirates id": 0.75,
-            "customer risk rating(aml)": 1.00,
-            "fatca declaration": 1.00,
             "passport": 0.50
         }
 
@@ -128,72 +124,7 @@ class Formatter:
                             "status": "this is Visa card",
                             "extraction": []
                         }
-                        # found_emirates_id = True
-        
-            elif extracted_class == "trade license":
-                industry_sector_value = ""
-                legal_structure_value = ""
-                industry_sector_exists = False
-                legal_structure_exists = False
-
-                # Step 1: Extract values and existence flags
-                for item in data.get("extraction", []):
-                    key = item.get("backend_entity_key")
-                    if key == "industry_sector":
-                        industry_sector_exists = True
-                        industry_sector_value = item.get("entity_value", "").strip()
-                    elif key == "legal_structure":
-                        legal_structure_exists = True
-                        legal_structure_value = item.get("entity_value", "").strip()
-
-                # Step 2: Update fields
-                for item in data.get("extraction", []):
-                    key = item.get("backend_entity_key")
-
-                    if key == "legal_structure" and industry_sector_value and industry_sector_value != legal_structure_value:
-                        logger.info(f"[TRADE LICENSE] Overwriting legal_structure '{legal_structure_value}' with industry_sector '{industry_sector_value}' on page: {page}")
-                        item["entity_value"] = industry_sector_value
-
-                    elif key == "industry_sector" and not industry_sector_value and legal_structure_value:
-                        logger.info(f"[TRADE LICENSE] Copying legal_structure '{legal_structure_value}' to blank industry_sector on page: {page}")
-                        item["entity_value"] = legal_structure_value
-
-                # Step 3: Add missing keys
-                if not industry_sector_exists and legal_structure_value:
-                    logger.info(f"[TRADE LICENSE] Adding missing industry_sector with value '{legal_structure_value}' on page: {page}")
-                    data["extraction"].append({
-                         "entity_name_for_t24": "Industry Sector",
-                        "entity_context": "{}",
-                        "entity_data_type": "Alphabet",
-                        "entity_key_customer_type": "Non-Individual",
-                        "entity_key_rp_type": "Non-Individual-RP",
-                        "backend_entity_key": "industry_sector",
-                        "backend_entity_key": "industry_sector",
-                        "entity_value": legal_structure_value,
-                        "checked": False,
-                        "model": "custom_logic"
-                    })
-
-                if not legal_structure_exists and industry_sector_value:
-                    logger.info(f"[TRADE LICENSE] Adding missing legal_structure with value '{industry_sector_value}' on page: {page}")
-                    data["extraction"].append({
-                        "entity_name_for_t24": "Legal Structure (partnership company, etc.)",
-                        "entity_context": "{}",
-                        "entity_data_type": "Alphabet",
-                        "entity_key_customer_type": "Non-Individual",
-                        "entity_key_rp_type": "Non-Individual-RP",
-                        "backend_entity_key": "legal_structure",
-                        "entity_value": industry_sector_value,
-                        "checked": False,
-                        "model": "custom_logic"
-                    })
-
-                include_pages[page] = {
-                    "classification": data["classification"],
-                    "extraction": data.get("extraction", [])
-                }
-                    
-
+            
 
 
             elif extracted_class == "passport":
