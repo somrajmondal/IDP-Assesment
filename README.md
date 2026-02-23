@@ -1,12 +1,10 @@
-📄 Intelligent Document Processing Software
+📄 Intelligent Document Processing (IDP) Platform
 
-Upload, process, and break down data barriers with AI to extract valuable information from documents.
-
-An enterprise-grade AI Document Digitization Platform that automates document classification, data extraction, and structured output generation using configurable templates and an external LLM service.
+An enterprise-grade AI Document Digitization Platform that dynamically classifies documents, extracts structured data, and generates machine-readable outputs using configurable templates and an external LLM service — without any hardcoded logic.
 
 🚀 Overview
 
-This platform enables organizations to digitize, classify, and extract structured data from documents such as:
+This platform enables organizations to upload, classify, and extract structured information from documents such as:
 
 Passports
 
@@ -14,55 +12,100 @@ Emirates IDs
 
 Salary Certificates
 
+Bank Statements
 
-It provides a modern UI, admin-driven configuration, and LLM-powered intelligence while keeping the architecture modular and scalable.
+Invoices
 
-✨ Core Features
+Any custom document type (added dynamically)
+
+The system is fully configurable via Admin UI, allowing document intelligence logic to evolve without redeployment or code changes.
+
+✨ Core Capabilities
 📁 Document Management
 
 Folder-based document organization
 
 Upload up to 5 files per folder
 
-Support for multi-page documents
+Multi-page document support
 
-ZIP download of original files
+Page-wise processing & extraction
 
-🧠 AI Processing
+🧠 AI-Powered Processing
 
-Automatic document classification
+Prompt-based dynamic document classification
 
-Entity extraction using dynamic templates
+Entity extraction using admin-defined templates
 
 Page-wise extraction results
 
 Confidence scoring per extracted field
 
-🛠️ Admin Configuration
+Stateless external LLM integration
 
-Document type management
+🛠️ Fully Dynamic Admin Configuration (No Code Changes)
 
-Template creation per document type
+Admins can add, edit, or delete everything at runtime:
 
-Entity definition with:
+📄 Document Types
 
-Backend keys
+Define document name & description
 
-Data types (Text, Numeric, Date, etc.)
+Configure classification prompt
 
-Customer type
+Add unlimited document types dynamically
 
-LLM prompt descriptions
+📑 Templates
 
-Live JSON preview sent to AI engine
+Multiple templates per document type
 
-📤 Export Options
+Support different layouts/formats
+
+Enable/disable templates anytime
+
+🧾 Entities
+
+Each entity is fully configurable:
+
+Entity name
+
+Backend key
+
+Data type (Text, Numeric, Date, Boolean, etc.)
+
+Customer type (Individual / Non-Individual)
+
+LLM prompt description
+
+Runtime editable & removable
+
+➡️ Nothing is hardcoded. Everything is prompt-driven.
+
+🔁 Dynamic AI Execution Flow
+
+Admin configures document types, templates & entities
+
+Backend builds a live JSON schema
+
+JSON + prompt sent to external LLM
+
+LLM performs:
+
+Document classification
+
+Entity extraction
+
+Structured output returned & stored
+
+📤 Export & Integration
 
 Download extracted data as JSON
 
 Page-wise structured output
 
 API-accessible extraction results
+
+Ready for downstream systems
 
 🏗️ System Architecture
 Frontend (React + TypeScript)
@@ -73,88 +116,100 @@ External LLM Service
   • Document Classification
   • Entity Extraction
 
-The AI engine is integrated as an external service, ensuring flexibility and easy replacement or scaling.
+Clean separation of concerns
+
+AI engine is pluggable & replaceable
+
+Microservice-ready architecture
 
 📁 Project Structure
 doc-digitization/
-├── backend/                  # FastAPI backend
-│   ├── app/
-│   │   ├── api/              # API routes
-│   │   ├── models/           # Database models
-│   │   ├── schemas/          # Request/response schemas
-│   │   ├── db/               # Database configuration
-│   │   └── main.py           # App entry point
-│   └── requirements.txt
+├── backend/
+│   ├── api/
+│   ├── models/
+│   ├── services/
+│   └── main.py
 │
-└── frontend/                 # React + TypeScript frontend
-    ├── src/
-    │   ├── components/       # Reusable UI components
-    │   ├── pages/            # Dashboard & Admin views
-    │   ├── store/            # State management
-    │   ├── utils/            # API utilities
-    │   └── App.tsx
-    └── package.json
-
+├── frontend/
+│   ├── src/
+│   ├── components/
+│   └── pages/
+│
+└── LLM/
+    ├── main.py
+    └── prompts/
 ⚙️ Setup & Run
 Backend
 cd backend
 pip install -r requirements.txt
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+uvicorn main:app --reload
 
-API documentation available at:
+Backend runs at:
 
-http://localhost:8000/docs
+http://localhost:8000
 Frontend
 cd frontend
 npm install
 npm run dev
 
-Application runs at:
+Frontend runs at:
 
 http://localhost:3000
+LLM Service
+cd LLM
+python main.py
+
+LLM service runs at:
+
+http://localhost:5002
 🧠 AI Processing Integration
-
-The platform connects to an external AI/LLM service during document processing.
-
-Processing Request Example
+Processing Request
 {
   "folder_id": 1,
   "llm_endpoint": "http://127.0.0.1:5002/up_doc"
 }
 Expected AI Response Format
 {
-  "1": {
-    "classification": {
-      "document_type": "Passport",
-      "confidence": 0.97
-    },
-    "extraction": [
-      {
-        "entity": "passport_number",
-        "value": "A12345678",
-        "confidence": 0.93,
-        "page": 1
-      }
-    ]
-  }
+  "classification": {
+    "class_name": "Salary Certificate",
+    "score": 1,
+    "technique": "openai - level 1"
+  },
+  "confidence": 1,
+  "entities": [
+    {
+      "backend_entity_key": "employer_name",
+      "entity_name": "Employer Name",
+      "entity_value": "Imaginorlabs Private Limited",
+      "entity_data_type": "AlphaNumeric",
+      "entity_description": "Name of the company employing the individual.",
+      "entity_key_customer_type": "Individual",
+      "model": "openai"
+    }
+  ],
+  "page": 1,
+  "error": null
 }
+🗄️ Database Configuration
 
-🗄️ Database
+Default:
 
-Default: SQLite
+SQLite
 
-Optional: PostgreSQL
+Production (Example):
 
 DATABASE_URL=postgresql://user:password@localhost/docdb
 🔐 Security & Scalability
 
-Clean separation between UI, backend, and AI engine
-
 Stateless AI processing
+
+Clear separation between UI, Backend & AI
 
 Easily deployable as microservices
 
-Ready for cloud & enterprise environments
+Cloud & enterprise ready
+
+Supports horizontal scaling
 
 📌 Use Cases
 
@@ -167,4 +222,3 @@ Government ID digitization
 Enterprise document indexing
 
 Data migration & validation
-
